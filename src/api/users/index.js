@@ -155,6 +155,26 @@ usersRouter.get("/:userId/purchaseHistory/:productId", async (req, res, next) =>
 
 usersRouter.put("/:userId/purchaseHistory/:productId", async (req, res, next) => {
   try {
+    // 1. Find user By Id (obtaining a MONGOOSE DOCUMENT!)
+    const user = await UsersModel.findById(req.params.userId)
+    if (user) {
+      // 2. Update the right item in the array by using normal JS code
+
+      // 2.1 Search for the index of the product into purchaseHistory array
+      const index = user.purchaseHistory.findIndex(book => book._id.toString() === req.params.productId)
+
+      if (index !== -1) {
+        // 2.2 If the product is there --> modify that product with some new data coming from req.body
+        user.purchaseHistory[index] = { ...user.purchaseHistory[index].toObject(), ...req.body }
+        // 3. Since user is a MONGOOSE DOCUMENT I can use .save() method to update that record
+        await user.save()
+        res.send(user)
+      } else {
+        next(createHttpError(404, `Book with id ${req.params.productId} not found!`))
+      }
+    } else {
+      next(createHttpError(404, `User with id ${req.params.userId} not found!`))
+    }
   } catch (error) {
     next(error)
   }
