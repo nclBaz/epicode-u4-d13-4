@@ -16,7 +16,7 @@ const usersSchema = new Schema(
     professions: [String],
     purchaseHistory: [
       {
-        title: String,
+        title: { type: String, required: true },
         category: String,
         asin: String,
         price: Number,

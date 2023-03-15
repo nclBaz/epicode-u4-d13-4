@@ -146,7 +146,7 @@ usersRouter.get("/:userId/purchaseHistory/:productId", async (req, res, next) =>
         next(createHttpError(404, `Book with id ${req.params.productId} not found!`))
       }
     } else {
-      next(createHttpError(404, `Book with id ${req.body.bookId} not found!`))
+      next(createHttpError(404, `User with id ${req.params.userId} not found!`))
     }
   } catch (error) {
     next(error)
@@ -162,6 +162,16 @@ usersRouter.put("/:userId/purchaseHistory/:productId", async (req, res, next) =>
 
 usersRouter.delete("/:userId/purchaseHistory/:productId", async (req, res, next) => {
   try {
+    const updatedUser = await UsersModel.findByIdAndUpdate(
+      req.params.userId, // WHO
+      { $pull: { purchaseHistory: { _id: req.params.productId } } }, // HOW
+      { new: true, runValidators: true } // OPTIONS
+    )
+    if (updatedUser) {
+      res.send(updatedUser)
+    } else {
+      next(createHttpError(404, `User with id ${req.params.userId} not found!`))
+    }
   } catch (error) {
     next(error)
   }
