@@ -23,7 +23,12 @@ booksRouter.get("/", async (req, res, next) => {
       .sort(mongoQuery.options.sort)
     const total = await BooksModel.countDocuments(mongoQuery.criteria)
     // no matter the order of usage of these methods, Mongo will ALWAYS apply SORT then SKIP then LIMIT
-    res.send({ total, numberOfPages: Math.ceil(total / mongoQuery.options.limit), books })
+    res.send({
+      links: mongoQuery.links("http://localhost:3001/books", total),
+      total,
+      numberOfPages: Math.ceil(total / mongoQuery.options.limit),
+      books,
+    })
   } catch (error) {
     next(error)
   }
