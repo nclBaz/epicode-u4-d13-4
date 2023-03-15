@@ -120,6 +120,12 @@ usersRouter.post("/:userId/purchaseHistory", async (req, res, next) => {
 
 usersRouter.get("/:userId/purchaseHistory", async (req, res, next) => {
   try {
+    const user = await UsersModel.findById(req.params.userId)
+    if (user) {
+      res.send(user.purchaseHistory)
+    } else {
+      next(createHttpError(404, `Book with id ${req.body.bookId} not found!`))
+    }
   } catch (error) {
     next(error)
   }
@@ -127,6 +133,21 @@ usersRouter.get("/:userId/purchaseHistory", async (req, res, next) => {
 
 usersRouter.get("/:userId/purchaseHistory/:productId", async (req, res, next) => {
   try {
+    const user = await UsersModel.findById(req.params.userId)
+    if (user) {
+      console.log("purchaseHistory:", user.purchaseHistory)
+      const purchasedBook = user.purchaseHistory.find(book => book._id.toString() === req.params.productId)
+      // YOU CANNOT COMPARE A STRING (req.params.productId) WITH AN OBJECTID (book._id)
+      // Solution --> you have to either convert _id into a string or productId into ObjectId
+      console.log("purchasedBook:", purchasedBook)
+      if (purchasedBook) {
+        res.send(purchasedBook)
+      } else {
+        next(createHttpError(404, `Book with id ${req.params.productId} not found!`))
+      }
+    } else {
+      next(createHttpError(404, `Book with id ${req.body.bookId} not found!`))
+    }
   } catch (error) {
     next(error)
   }
